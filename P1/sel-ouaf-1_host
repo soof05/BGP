@@ -1,0 +1,6 @@
+FROM alpine:3.21
+
+# install basic networking tools
+RUN apk add --no-cache iproute2 iputils net-tools
+
+CMD ["/bin/sh"]
