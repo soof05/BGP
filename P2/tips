@@ -1,0 +1,3 @@
+ i need to create a bridge br0 in the switch
+ command to create bridge => ip link add br0 type bridge
+ show details in json ip -j -p -d link show br0
