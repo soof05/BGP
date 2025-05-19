@@ -17,7 +17,7 @@ brctl addif br0 vxlan10
 brctl addif br0 eth1
 
 # you can run 
-# ip link show 
+ip link show 
 #  to check if the above commands worked as expected
 
 hostname router_sel-ouaf-2
@@ -42,3 +42,43 @@ address-family l2vpn evpn
 !
 router ospf
 !
+
+
+
+# Set the hostname of the router
+hostname router_sel-ouaf-2
+
+# Disable IPv6 packet forwarding
+no ipv6 forwarding
+
+# Configure interface eth0 with an IP address and OSPF area
+interface eth0
+    ip address 10.1.1.2/30
+    ip ospf area 0
+
+# Configure the loopback interface with an IP address and OSPF area
+interface lo
+    ip address 1.1.1.2/32
+    ip ospf area 0
+
+# Configure BGP with ASN 1
+router bgp 1
+    # Define a BGP neighbor with IP 1.1.1.1 and ASN 1
+    neighbor 1.1.1.1 remote-as 1
+
+    # Use the loopback interface as the source for BGP updates
+    neighbor 1.1.1.1 update-source lo
+
+# Enter the EVPN address-family under BGP
+address-family l2vpn evpn
+    # Activate the EVPN address family for the neighbor
+    neighbor 1.1.1.1 activate
+
+    # Advertise all VNIs (required for VXLAN-EVPN)
+    advertise-all-vni
+
+    # Exit EVPN address-family configuration
+    exit-address-family
+
+# Enable OSPF routing process
+router ospf
