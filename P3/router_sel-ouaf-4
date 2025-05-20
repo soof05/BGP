@@ -9,7 +9,7 @@ brctl addif br0 eth0
 hostname router_sel-ouaf-4
 no ipv6 forwarding
 !
-interface eth2
+interface eth1
     ip address 10.1.1.10/30
     ip ospf area 0
 !
@@ -27,3 +27,4 @@ address-family l2vpn evpn
    exit-address-family
 !
 router ospf
+
