@@ -1,84 +1,91 @@
-# Create a new Linux bridge interface named br0
-ip link add br0 type bridge
-
-# Bring the bridge interface br0 up
-ip link set dev br0 up
-
-# Create a VXLAN interface named vxlan10 with VXLAN ID 10 and destination UDP port 4789
-ip link add vxlan10 type vxlan id 10 dstport 4789
-
-# Bring the VXLAN interface vxlan10 up
-ip link set dev vxlan10 up
-
-# Add the VXLAN interface to the bridge br0
-brctl addif br0 vxlan10
-
-# Add the physical interface eth1 to the bridge br0
-brctl addif br0 eth1
-
-# you can run 
-ip link show 
-#  to check if the above commands worked as expected
-
-hostname router_sel-ouaf-2
+hostname router_sel-ouaf-1
 no ipv6 forwarding
 !
 interface eth0
-    ip address 10.1.1.2/30
-    ip ospf area 0
+    ip address 10.1.1.1/30
+!
+interface eth1
+     ip address 10.1.1.5/30
+!
+interface eth2
+    ip address 10.1.1.9/30
 !
 interface lo
-    ip address 1.1.1.2/32
-    ip ospf area 0
+    ip address 1.1.1.1/32
 !
 router bgp 1
-    neighbor 1.1.1.1 remote-as 1
-    neighbor 1.1.1.1 update-source lo
+    neighbor ibgp peer-group
+    neighbor ibgp remote-as 1
+    neighbor ibgp update-source lo
+    bgp listen range 1.1.1.0/29 peer-group ibgp
 !
 address-family l2vpn evpn
-    neighbor 1.1.1.1 activate
-    advertise-all-vni
-   exit-address-family
+    neighbor ibgp activate
+    neighbor ibgp route-reflector-client
+  exit-address-family
 !
 router ospf
+    network 0.0.0.0/0 area 0
+!
+line vty
 !
 
-
+Explanation
+--------------------------------------------------------------------------------
 
 # Set the hostname of the router
-hostname router_sel-ouaf-2
+hostname router_sel-ouaf-1
 
 # Disable IPv6 packet forwarding
 no ipv6 forwarding
 
-# Configure interface eth0 with an IP address and OSPF area
-interface eth0
-    ip address 10.1.1.2/30
-    ip ospf area 0
+!
 
-# Configure the loopback interface with an IP address and OSPF area
+# Configure eth0 with an IP address (link to router_sel-ouaf-2)
+interface eth0
+    ip address 10.1.1.1/30
+
+# Configure eth1 with an IP address (link to router_sel-ouaf-3)
+interface eth1
+    ip address 10.1.1.5/30
+
+# Configure eth2 with an IP address (link to router_sel-ouaf-4)
+interface eth2
+    ip address 10.1.1.9/30
+
+# Configure loopback interface with a unique router ID
 interface lo
-    ip address 1.1.1.2/32
-    ip ospf area 0
+    ip address 1.1.1.1/32
 
 # Configure BGP with ASN 1
 router bgp 1
-    # Define a BGP neighbor with IP 1.1.1.1 and ASN 1
-    neighbor 1.1.1.1 remote-as 1
+    # Define a peer-group named 'ibgp' for iBGP configuration
+    neighbor ibgp peer-group
 
-    # Use the loopback interface as the source for BGP updates
-    neighbor 1.1.1.1 update-source lo
+    # Set remote ASN for the peer-group (iBGP within the same ASN)
+    neighbor ibgp remote-as 1
 
-# Enter the EVPN address-family under BGP
+    # Use loopback interface as update source for iBGP
+    neighbor ibgp update-source lo
+
+    # Automatically accept neighbors in the specified range into the peer-group
+    bgp listen range 1.1.1.0/29 peer-group ibgp
+
+# Enter EVPN address-family under BGP
 address-family l2vpn evpn
-    # Activate the EVPN address family for the neighbor
-    neighbor 1.1.1.1 activate
+    # Activate EVPN for all iBGP peers in the peer-group
+    neighbor ibgp activate
 
-    # Advertise all VNIs (required for VXLAN-EVPN)
-    advertise-all-vni
+    # Configure this router as a route reflector for iBGP EVPN clients
+    neighbor ibgp route-reflector-client
 
-    # Exit EVPN address-family configuration
+    # Exit the address-family configuration
     exit-address-family
 
 # Enable OSPF routing process
 router ospf
+     # Advertise all connected networks in OSPF area 0
+    network 0.0.0.0/0 area 0
+
+# Configure access to the router via VTY (virtual terminal lines)
+line vty
