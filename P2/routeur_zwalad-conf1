@@ -1,3 +1,4 @@
+#uni
 bash
 
 ip addr add dev eth0 10.0.0.1/30
@@ -8,6 +9,8 @@ ip link set vxlan10 master br0
 ip link set br0 up
 ip link set vxlan10 up
 
+
+#multi
 bash
 
 ip addr add dev eth0 10.0.0.1/30
