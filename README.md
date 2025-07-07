@@ -136,9 +136,9 @@ BADASS/
 
 ---
 
-## 🚀 Author
+## 🚀 Authors
 
-- 👤 Name: Mohammed Habibi Ihlane (replace with your login if different)
+- 👤 Name: Mohammed Habibi Ihlane , Zakaria Walad , Soufiane El Ouafqaoui
 - 💻 Project: BADASS – 42/1337 Network Simulation
 - 📅 Year: 2025
 
