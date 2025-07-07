@@ -141,7 +141,7 @@ Exported ZIPs (`P1_export.zip`, etc.) must be included in each folder:
 
 ---
 
-## 🧠 Author
+## 🧠 Authors
 
 * 👤 Mohammed Habibi Ihlane , Zakaria walad , Soufiane El Ouafqaoui
 * 🏫 1337 / 42 Network
