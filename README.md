@@ -1,149 +1,154 @@
 ```markdown
-# BADASS - BGP At Doors of Autonomous Systems is Simple 🧠📡
+# 🚀 BADASS — BGP At Doors of Autonomous Systems is Simple  
+### 🧠 A Network Simulation Project with Docker, VXLAN, and BGP EVPN
 
-Welcome to the BADASS project! This repository contains the three main parts of the project which simulate networking environments using **GNS3** and **Docker**. You’ll discover advanced topics such as **VXLAN**, **BGP**, and **EVPN** using real-world routing tools.
+This project was developed as part of the **42 Network / 1337** curriculum. The goal is to simulate and understand core networking technologies like **VXLAN**, **BGP**, **OSPF**, and **EVPN** using real router daemons inside **Docker containers**, orchestrated through **GNS3**.
 
----
-
-## 🗂️ Repository Structure
-
-```
-
-BADASS/
-├── P1/                # Part 1: GNS3 + Docker setup
-│   ├── Dockerfile.host
-│   ├── Dockerfile.router
-│   ├── zebra.conf
-│   ├── bgpd.conf
-│   ├── ospfd.conf
-│   ├── isisd.conf
-│   ├── daemons
-│   ├── P1.gns3project
-│   └── P1\_export.zip
-├── P2/                # Part 2: VXLAN static & multicast
-│   ├── P2.gns3project
-│   └── VXLAN config files
-├── P3/                # Part 3: BGP EVPN with route reflection
-│   ├── P3.gns3project
-│   └── EVPN config files
-└── README.md
-
-```
+It is divided into three mandatory parts, each exploring deeper networking scenarios — from building router images with Docker, to tunneling with VXLANs, and finally discovering route reflection and EVPN with BGP.
 
 ---
 
-## 🧩 Part 1 - GNS3 Configuration with Docker
+## 📁 Project Structure
 
-### 🔹 Objectives
-- Set up two custom Docker images:
-  1. **host_<login>**: a minimal host image (Alpine + BusyBox)
-  2. **router_<login>**: router image with Zebra/Quagga, BGP, OSPF, IS-IS support
-- Integrate both images into GNS3
-- Build a test topology:
-  
-```
-
-+-------------+       +---------------+
-\| host\_<login>| <---> | router\_<login>|
-+-------------+       +---------------+
-
-```
-
-### 🔧 Key Steps
-- Install GNS3 and Docker
-- Build Docker images using provided Dockerfiles
-- Use GNS3 Preferences → Docker Containers to register your images
-- Export the GNS3 project as `.zip` and include it in `P1/`
+| Folder    | Description                                                                 |
+|-----------|-----------------------------------------------------------------------------|
+| `P1/`     | GNS3 setup with custom Docker images simulating a host and a router.       |
+| `P2/`     | VXLAN configuration in both static and dynamic multicast modes.            |
+| `P3/`     | BGP EVPN setup with VXLAN 10 and route reflection simulating a datacenter. |
+| `README.md` | This file, describing the overall structure and configuration.           |
 
 ---
 
-## 🌐 Part 2 - Discovering VXLAN
+## 🧱 Part 1: GNS3 Configuration with Docker
 
-### 🔹 Objectives
-- Understand and simulate **VXLAN** using both:
-- Static VXLAN configuration
-- Multicast-based VXLAN (dynamic)
-- Build a GNS3 topology that uses VXLAN with VNI `10`
-- Set up bridges (e.g. `br0`) and Ethernet interfaces between hosts
+You will build **two Docker images**:
 
-### 🔧 Configuration Summary
+- **host_<login>**: Based on Alpine Linux with BusyBox, acts as a lightweight client.
+- **router_<login>**: Based on Debian, includes Quagga routing suite with BGPD, OSPFD, IS-ISD, and Zebra.
+
+### 🐋 Docker Image Overview
+
+| Image            | Base     | Tools & Services                              |
+|------------------|----------|-----------------------------------------------|
+| `host_<login>`   | Alpine   | `busybox`, `iproute2`, `iputils`              |
+| `router_<login>` | Debian   | `quagga`, `bgpd`, `ospfd`, `isisd`, `zebra`   |
+
+These images are then imported into GNS3 as Docker containers, and connected to test routing behavior.
+
+### 🖥️ Sample Topology
+
+```
+
+\[host\_<login>] <----> \[router\_<login>]
+
+````
+
+All files (Dockerfiles, configs, exported project) are placed inside the `P1/` folder.  
+GNS3 project is exported with base images as a `.zip`.
+
+---
+
+## 🌐 Part 2: Discovering VXLAN
+
+This part introduces **VXLAN (Virtual eXtensible LAN)** using two approaches:
+
+- **Static VXLAN**: Configured with bridge and vxlan interfaces
+- **Dynamic VXLAN (Multicast)**: Uses a multicast group (e.g., `239.1.1.1`) for dynamic group communication
+
+### 🔧 Key Configuration Concepts
+
 - Create VXLAN interfaces (`vxlan10`)
-- Attach them to bridges (`br0`)
-- Test connectivity via `ping`
-- Verify MAC learning with bridge tools (e.g., `bridge fdb show`)
+- Attach to bridges (`br0`)
+- Assign Ethernet interfaces to the bridge
+- Test connectivity via ping between endpoints
+- Use `bridge fdb show` to inspect MAC learning
 
-### 🔁 Dynamic Mode
-- Use a multicast group like `239.1.1.1` to simulate dynamic VXLAN
-- Confirm that endpoints join and learn dynamically
-
----
-
-## 🔁 Part 3 - BGP with EVPN
-
-### 🔹 Objectives
-- Discover **BGP EVPN** without MPLS
-- Use **VXLAN ID 10** again
-- Implement **Route Reflection (RR)** and **dynamic MAC discovery**
-- Configure multiple VTEPs (virtual tunnel endpoints)
-
-### 🔧 Topology Concepts
-- Use OSPF to simplify underlay routing
-- Configure BGP with:
-- Route Distinguisher (RD)
-- Route Target (RT)
-- Use GNS3 hosts like: `host_<login>-1`, `host_<login>-3`
-- Observe route type 2 auto-generation when MAC addresses are discovered
+All configuration files and the exported GNS3 project are included in the `P2/` folder.
 
 ---
 
-## 💾 Export Instructions
+## 📡 Part 3: Discovering BGP with EVPN
 
-### For each part:
-- File > Export portable project
-- ✅ Include base images
-- Save the project as `.zip` in `P1/`, `P2/`, `P3/`
+In this final part, you simulate a **datacenter-like environment** using:
 
----
+- **BGP EVPN** (RFC 7432) without MPLS
+- **VXLAN ID 10**
+- **Route Reflector (RR)** as a central controller
+- **Dynamic MAC discovery**
 
-## 📌 Naming Rules & Notes
+### 🏗️ Goals
 
-- All machines and configs **must include your login** (e.g. `host_habibi`, `router_habibi`)
-- Do **not** preconfigure IPs inside Docker images
-- Add comments inside all config files
-- Follow folder naming strictly:
-- `P1/`, `P2/`, `P3/` — each must contain the `.gns3project` file and configs
+- Each VTEP (virtual tunnel endpoint) is a router connected to one or more hosts.
+- Hosts can communicate through BGP-learned VXLAN tunnels even without assigned IP addresses.
+- MAC routes (type 2) are dynamically discovered through EVPN.
 
----
+### 🕸️ BGP EVPN Concepts Covered
 
-## ✅ Submission Check List
+- VNI (VXLAN Network Identifier)
+- Route Types: 2 (MAC/IP advertisement), 3 (Inclusive Multicast Route)
+- Route Distinguisher (RD), Route Target (RT)
+- Leaf-Spine topology with RR in center
 
-| Item                             | Done |
-|----------------------------------|------|
-| Docker images built correctly    | ✅   |
-| Topologies set up in GNS3        | ✅   |
-| Config files added and commented | ✅   |
-| All parts exported to `.zip`     | ✅   |
-| Project folders organized        | ✅   |
-| GNS3 nodes named with login      | ✅   |
+The full topology and config files are found in the `P3/` folder.
 
 ---
 
-## 🤝 Evaluation Tips
+## 📦 Export Instructions
 
-- Be ready to **explain terms** like: VXLAN, BGP, EVPN, RD/RT, Route Reflector, OSPF, MAC learning, etc.
-- Your evaluation happens on your machine — test everything twice!
-- Use `README.md` to guide the evaluator
+For each part, the GNS3 project must be exported as `.zip`:
+
+```bash
+# In GNS3:
+File → Export portable project → Include base Docker images
+````
+
+Exported ZIPs (`P1_export.zip`, etc.) must be included in each folder:
+
+* `P1/`
+* `P2/`
+* `P3/`
 
 ---
 
-## 🚀 Authors
+## 📌 Naming Rules
 
-- 👤 Name: Mohammed Habibi Ihlane , Zakaria Walad , Soufiane El Ouafqaoui
-- 💻 Project: BADASS – 42/1337 Network Simulation
-- 📅 Year: 2025
+* All devices, images, and files must include your login (e.g. `host_habibi`, `router_habibi`).
+* No IP addresses should be preconfigured inside the Docker images.
+* All configuration files must include comments explaining their purpose.
 
 ---
 
-## 🧠 Enjoy Routing Like a BADASS!
+## ✅ Evaluation Checklist
 
-```
+| Requirement                                | Status |
+| ------------------------------------------ | ------ |
+| Docker images created and documented       | ✅      |
+| GNS3 containers imported and running       | ✅      |
+| VXLAN static and multicast tested          | ✅      |
+| BGP EVPN with dynamic MAC learning working | ✅      |
+| Project zipped and committed               | ✅      |
+
+---
+
+## 📚 Concepts Practiced
+
+* Dockerfile creation and container networking
+* GNS3 simulation with custom images
+* Routing protocols: OSPF, BGP, IS-IS
+* VXLAN tunneling (static and multicast)
+* BGP EVPN with route reflection
+* MAC address learning and L2 virtualization
+
+---
+
+## 🧠 Author
+
+* 👤 Mohammed Habibi Ihlane , Zakaria walad , Soufiane El Ouafqaoui
+* 🏫 1337 / 42 Network
+* 📅 2025
+
+---
+
+## 🌐 Final Thoughts
+
+This project is a deep dive into software-defined networking principles, preparing you for real-world infrastructure automation, cloud networking, and advanced protocol deployment. If you’ve reached this far — congratulations, you’re officially a BADASS. 😎🔥
